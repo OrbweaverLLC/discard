@@ -128,7 +128,7 @@ module Discard
     def discard
       return false if discarded?
 
-      with_transaction_returning_status do
+      with_discard_transaction do
         run_callbacks(:discard) do
           update_attribute(self.class.discard_column, Time.current)
         end
@@ -153,7 +153,7 @@ module Discard
     def undiscard
       return false unless discarded?
 
-      with_transaction_returning_status do
+      with_discard_transaction do
         run_callbacks(:undiscard) do
           update_attribute(self.class.discard_column, nil)
         end
@@ -173,6 +173,18 @@ module Discard
     end
 
     private
+
+    # ActiveRecord wraps discard/undiscard in a transaction so a raised callback
+    # rolls back the column write. Mongoid does not implement
+    # +with_transaction_returning_status+, so fall back to running the block
+    # directly (Mongo transactions require a replica set and different APIs).
+    def with_discard_transaction(&block)
+      if respond_to?(:with_transaction_returning_status, true)
+        with_transaction_returning_status(&block)
+      else
+        yield
+      end
+    end
 
     def _raise_record_not_discarded
       raise ::Discard::RecordNotDiscarded.new(discarded_fail_message, self)
