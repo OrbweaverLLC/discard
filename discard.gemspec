@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z lib CHANGELOG.md LICENSE.txt README.md`.split("\x0")
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "activerecord", ">= 7.0", "< 9.0"
+  spec.add_dependency "activesupport", ">= 7.0", "< 9.0"
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake", ">= 10.0"
   spec.add_development_dependency "rspec", "~> 3.13"
